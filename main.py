@@ -11,7 +11,7 @@ def process_error_queue():
     global temp_values, totalErrorCount, errorText1, errorNumber1, each
     temp_values = SCPI_M8070B.query_ascii_values(':SYSTem:ERRor:COUNt?')
     totalErrorCount = int(temp_values[0])
-    while totalErrorCount > 0:
+    while totalErrorCount > 0: #lets read one message at a time and display and keep reading them until there are no more messages
         errorText1 = ""
         print("error queue count:", totalErrorCount)
         temp_values = SCPI_M8070B.query_ascii_values(':SYSTem:ERRor:NEXT?', converter='s')
@@ -21,29 +21,30 @@ def process_error_queue():
         for each in temp_values:
             errorText1 = errorText1 + each
         print("error text:", errorText1)
+        print("error count after read", totalErrorCount)
 
-# case1: Fails when pulse is set to 32 and then Pam4 coding is requested
-print("\n************************************************************************")
-print ("case1: Fails when pulse is set to 32 and then Pam4 coding is requested")
-set = SCPI_M8070B.query(':DATA:SEQuence:SET? "%s"' % ('M1.DataOut1'))
-SCPI_M8070B.write(':DATA:SEQuence:SET "%s",%s,"%s"' % ('M1.DataOut1', 'PULSE', '32'))
-SCPI_M8070B.write(':DATA:LINecoding:VALue "%s",%s' % ('M1.DataOut1', 'PAM4'))
-temp_values = SCPI_M8070B.query_ascii_values(':SYSTem:ERRor:COUNt?')
-
-process_error_queue()
-
-
-# case2: Fails when Pam4 coding is set and pulse  pattern type which is unsupported is requested
-print("\n************************************************************************")
-print ("case2: Fails when Pam4 coding is set and pulse  pattern type which is unsupported is requested")
-SCPI_M8070B.write(':DATA:SEQuence:SET "%s",%s,"%s"' % ('M1.DataOut1', 'PRBS', '2^13-1'))
-set1 = SCPI_M8070B.query(':DATA:SEQuence:SET? "%s"' % ('M1.DataOut1'))
-SCPI_M8070B.write(':DATA:LINecoding:VALue "%s",%s' % ('M1.DataOut1', 'PAM4'))
-SCPI_M8070B.write(':DATA:SEQuence:SET "%s",%s,"%s"' % ('M1.DataOut1', 'PULSE', '32'))
+# # case1: Fails when pulse is set to 32 and then Pam4 coding is requested
+# print("\n************************************************************************")
+# print ("case1: Fails when pulse is set to 32 and then Pam4 coding is requested")
+# set = SCPI_M8070B.query(':DATA:SEQuence:SET? "%s"' % ('M1.DataOut1'))
+# SCPI_M8070B.write(':DATA:SEQuence:SET "%s",%s,"%s"' % ('M1.DataOut1', 'PULSE', '32'))
+# SCPI_M8070B.write(':DATA:LINecoding:VALue "%s",%s' % ('M1.DataOut1', 'PAM4'))
+# temp_values = SCPI_M8070B.query_ascii_values(':SYSTem:ERRor:COUNt?')
 #
-process_error_queue()
+# process_error_queue()
 
 
+# # case2: Fails when Pam4 coding is set and pulse  pattern type which is unsupported is requested
+# print("\n************************************************************************")
+# print ("case2: Fails when Pam4 coding is set and pulse  pattern type which is unsupported is requested")
+# SCPI_M8070B.write(':DATA:SEQuence:SET "%s",%s,"%s"' % ('M1.DataOut1', 'PRBS', '2^13-1'))
+# set1 = SCPI_M8070B.query(':DATA:SEQuence:SET? "%s"' % ('M1.DataOut1'))
+# SCPI_M8070B.write(':DATA:LINecoding:VALue "%s",%s' % ('M1.DataOut1', 'PAM4'))
+# SCPI_M8070B.write(':DATA:SEQuence:SET "%s",%s,"%s"' % ('M1.DataOut1', 'PULSE', '32'))
+# #
+# process_error_queue()
+#
+#
 # case3  where multiple errors in queue
 print("\n**************Important to iterate through all entries as there may be many queued****************************")
 print("\n**************This should  be part of the error interrogation routine             ****************************")
